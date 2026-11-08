@@ -58,6 +58,9 @@ PLATFORM_SCHEMA = PLATFORM_SCHEMA.extend(
                 ["3.1", "3.2", "3.3", "3.4", "3.5"]
             ),
             vol.Required(CONF_PERSISTENT_CONNECTION, default=DEFAULT_PERSISTENT_CONNECTION): cv.boolean,
+            # Fork consolover5-collab (DELO-209): let YAML pass control_type (1 or 2) for hubs
+            # whose status() never answers, so tinytuya skips detect_control_type(). 0 = auto.
+            vol.Optional(CONF_CONTROL_TYPE, default=0): vol.All(vol.Coerce(int), vol.In([0, 1, 2])),
     }
 )
 
