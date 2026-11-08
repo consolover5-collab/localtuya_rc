@@ -454,7 +454,14 @@ class TuyaRC(RemoteEntity):
                 self._device.study_end()
                 status = self._device.status()
             _LOGGER.debug(f"Device status: {status}")
-            self._available = bool(status) and "Error" not in status
+            # Fork consolover5-collab (DELO-209): some hubs (e.g. JMIR05 / GWW-RC03 on protocol 3.5)
+            # answer EVERY status() with ERR_JSON 900 "json obj data unvalid" yet accept send_ir fine.
+            # Treat a 900 reply as "reachable": otherwise the entity stays unavailable forever and
+            # Home Assistant silently drops remote.send_command calls to it.
+            self._available = bool(status) and (
+                "Error" not in status
+                or str(status.get("Err", "")).strip() == str(ERR_JSON)
+            )
             if self._available and isinstance(status, dict):
                 self._dps.update(status.get("dps") or {})
             if not self._available:
